@@ -1,0 +1,24 @@
+# Airflow configuration values
+executor: "KubernetesExecutor"
+
+# Global volumes and volume mounts for all airflow containers
+volumes:
+  - name: ml-pipeline-dag
+    configMap:
+      name: ml-pipeline-dag
+
+volumeMounts:
+  - name: ml-pipeline-dag
+    mountPath: /opt/airflow/dags/dag1.py
+    subPath: dag1.py
+    readOnly: true
+
+# Webserver configuration
+webserver:
+  service:
+    type: NodePort
+
+# Airflow configuration overrides
+config:
+  webserver:
+    rbac: false
