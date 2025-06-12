@@ -11,7 +11,7 @@ from ray import serve
 ray.init("ray://ray-cluster-kuberay-head-svc:10001")
 
 # Read best model info
-with open("/data/best_model_info.txt", "r") as f:
+with open("/data/best_model_info_finger-counting.txt", "r") as f:
     lines = f.read().strip().split("\n")
     run_id = lines[0]
     model_type = lines[1]

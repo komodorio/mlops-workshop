@@ -106,7 +106,7 @@ def get_model(model_type, num_classes=6):
     elif model_type == "cnn_wide":
         return SimpleCNN(num_classes, 16, 3)
     elif model_type == "mobilenet_v2":
-        model = models.mobilenet_v2()
+        model = models.mobilenet_v2(pretrained=True)
         # Freeze early layers
         for param in model.features[:-3].parameters():
             param.requires_grad = False
@@ -114,7 +114,7 @@ def get_model(model_type, num_classes=6):
         return model
 
     elif model_type == "resnet18":
-        model = models.resnet18()
+        model = models.resnet18(pretrained=True)
         # Freeze early layers
         for param in list(model.parameters())[:-10]:
             param.requires_grad = False

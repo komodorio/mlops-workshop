@@ -2,11 +2,12 @@ import sys
 import mlflow
 
 mlflow.set_tracking_uri("http://mlflow-tracking.default")
-experiment = mlflow.get_experiment_by_name(sys.argv[1])
+experiment_name = sys.argv[1]
+experiment = mlflow.get_experiment_by_name(experiment_name)
 
 runs = mlflow.search_runs(
     experiment_ids=[experiment.experiment_id],
-    order_by=["metrics.val_accuracy DESC"],
+    order_by=["metrics.val_accuracy DESC, metrics.train_accuracy DESC"],
     max_results=1,
 )
 
@@ -19,7 +20,7 @@ if not runs.empty:
     print(f"Best model: {model_type} with accuracy: {accuracy}")
 
     # Save model info for Ray Serve
-    with open("/data/best_model_info.txt", "w") as f:
+    with open("/data/best_model_info_%s.txt" % experiment_name, "w") as f:
         f.write(f"{run_id}\n{model_type}\n{accuracy}")
 
     print(f"Model info saved")

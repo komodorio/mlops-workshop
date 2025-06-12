@@ -1,11 +1,12 @@
 # MLOps Workshop
 
-![](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg?t=1)
+![Kaggle Dataset Illustration](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg?t=1)
 
-In this workshop, we are creating an end-to-end machine learning pipeline inside Kubernetes cluster. 
+In this workshop, we are creating an end-to-end machine learning pipeline inside Kubernetes cluster.
 
-We will train models to recognize the hand gestures showing N fingers. 
+We will train models to recognize the hand gestures showing N fingers. The best model among experiments will be served as API.
 
+It's just like automated "Miss Universe" choosing.
 
 ## Chapter 0: Preparations
 
@@ -14,6 +15,7 @@ Prerequisites:
 - k8s kIND installed,
 - helm installed
 - k9s installed
+- kubectl installed
 
 Starting from clean Kind cluster:
 
@@ -23,9 +25,8 @@ kind create cluster
 ```
 
 Alternatively: configure kubeconfig (kubectl) to use some existing cluster.
-Explain workshop setting: bypass auth, everything in single cluster and same namespace.
 
-_The skill of IT engineer is not to deploy flawlessly (nobody's able to), but to troubleshoot quickly._ 
+_The skill of IT engineer is not to deploy flawlessly (nobody's able to), but to troubleshoot quickly._
 
 Optional step: connect cluster to Komodor:
 
@@ -36,12 +37,15 @@ helm upgrade --install --create-namespace --namespace komodor komodor-agent komo
 ```
 
 Creating dedicated images would decrease the startup overhead.
-Our cluster will need a special Docker image inside. In case it's not possible to pull it from registries, you can build it locally and load into Kind cluster:
+Our cluster will need a special Docker image inside. In case it's not possible to pull it from registries, you can build
+it locally and load into Kind cluster:
+
 ```shell
 docker build . -t docker.io/komodorio/mlops-workshop:latest
 kind load docker-image docker.io/komodorio/mlops-workshop:latest
 ```
 
+Workshop setting: bypass auth, everything in single cluster and same namespace.
 In short, the real production setup is very complex, we simplified it.
 Using PVCs and configmaps for storage - workshop setup.
 All has to go into same namespace because of using PVCs to share the data. Real world would use Git, S3, NFS etc.
@@ -134,8 +138,6 @@ metrics etc. Add "val_accuracy" column to table.
 
 ## Chapter 4: PyTorch and real training
 
-TODO: illustrate and explain 4 models we are working with. It's just like "Miss Universe" we want to choose.
-
 We'll run direct training of single model variant. The training script is parameterized to have all our combinations
 inside.
 We're skipping realistic long data loading (eg from S3) by mounting volume to Pod.
@@ -181,12 +183,13 @@ kubectl cp C5S5-ray-tune.py workshop-helper-pod:/data/scripts/
 kubectl exec deployment/airflow-scheduler -- /bin/bash -c "airflow dags reserialize && airflow dags unpause dag5_ray_tune && airflow dags trigger dag5_ray_tune"
 ```
 
-At this stage your cooling fan should go WE-E-E-E-E-E-E. Can get OutOfMemory problems, too. That's quite alright.
+At this stage your cooling fan should go _WE-E-E-E-E-E-E_. Can get OutOfMemory problems, too.
 
-Main skill of data engineer seems to be "drinking your coffee slowly".
+That's quite alright. Main skill of modern data engineer seems to be "drinking your coffee slowly".
 
 Look at running DAG in Airflow and multiple experiment runs in MLFlow. It starts to take a lot of time, we'll skip this
-step in the next chapter, results are already in MLFlow, ready for querying.
+step in the next chapter, results are already in MLFlow, ready for querying. Also look at Ray UI showing the experiment
+runs.
 
 Wait for Airflow DAG to complete (can also proceed further, we have best model written in previous steps).
 
@@ -217,10 +220,13 @@ chooser.
 ```shell
 kubectl cp C7S1-ray-tune-large.py workshop-helper-pod:/data/scripts/
 kubectl cp C7S2-dag7.py workshop-helper-pod:/data/dags/
-kubectl exec deployment/airflow-scheduler -- /bin/bash -c "airflow dags reserialize && airflow dags unpause dag7_complete && airflow dags trigger dag7_complete"
+kubectl exec deployment/airflow-scheduler -- /bin/bash -c "airflow dags reserialize && airflow dags unpause dag7_complete"
 ```
 
 After this, your machine will be busy for long. This is where you want to switch to GPU training.
+
+In my decent desktop, it trained ~40mins `cnn_deep`, which is the fastest of our models. Trained ~100mins `cnn_wide`.
+Trained ~160mins `mobilenet_v2`.
 
 ## Chapter 8: Consuming the results
 
