@@ -12,7 +12,7 @@ import time
 import cv2
 import numpy as np
 import requests
-from PIL import Image, ImageFilter, ImageEnhance
+from PIL import Image, ImageFilter, ImageEnhance, ImageOps
 
 
 def preprocess_for_hand_detection(image):
@@ -27,6 +27,7 @@ def preprocess_for_hand_detection(image):
     # Apply slight blur to reduce noise
     blurred = enhanced.filter(ImageFilter.GaussianBlur(radius=1))
 
+    blurred = ImageOps.invert(blurred)
     return blurred.convert("RGB")
 
     # Simple thresholding - convert to binary

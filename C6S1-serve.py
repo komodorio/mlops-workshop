@@ -26,8 +26,8 @@ model.eval()
 # Same transforms as training
 transform = transforms.Compose(
     [
-        transforms.Grayscale(num_output_channels=3),  # Convert to grayscale but keep 3 channels
-        transforms.Lambda(lambda x: transforms.functional.invert(x)),  # Invert brightness
+        # transforms.Grayscale(num_output_channels=3),  # Convert to grayscale but keep 3 channels
+        # transforms.Lambda(lambda x: transforms.functional.invert(x)),  # Invert brightness
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
