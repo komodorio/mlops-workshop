@@ -1,5 +1,5 @@
 # MLOps Workshop
-![](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg)
+![](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg?t=1)
 
 ## Chapter 0: Preparations
 
