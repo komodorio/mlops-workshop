@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: workshop-helper-pod
+spec:
+  restartPolicy: Never
+  volumes:
+    - name: data-volume
+      persistentVolumeClaim:
+        claimName: workshop-pvc
+  containers:
+    - name: data-pvc
+      args:
+        - "sleep infinity"
+      command:
+        - /bin/bash
+        - -c
+      image: docker.io/komodorio/mlops-workshop:latest
+      imagePullPolicy: IfNotPresent
+
+      volumeMounts:
+        - mountPath: /data
+          name: data-volume

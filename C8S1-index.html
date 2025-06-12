@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finger Counting Model Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background-color: #f8f9ff;
+        }
+
+        .upload-section.drag-over {
+            border-color: #764ba2;
+            background-color: #f0f4ff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-btn, .camera-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .camera-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .upload-btn:hover, .camera-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .camera-btn:hover {
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .predict-btn {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .predict-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+
+        .predict-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .camera-section {
+            display: none;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .camera-controls {
+            margin: 15px 0;
+        }
+
+        .capture-btn {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .capture-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .stop-camera-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        #cameraVideo {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .image-preview, .prediction-result {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .prediction-result {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .finger-count {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .confidence {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .model-info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .probabilities {
+            margin: 15px 0;
+        }
+
+        .prob-bar {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .prob-label {
+            width: 80px;
+            font-weight: bold;
+        }
+
+        .prob-visual {
+            flex: 1;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .prob-value {
+            width: 50px;
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: #ffe0e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🖐️ Finger Counting Model</h1>
+
+    <div class="upload-section" id="uploadSection">
+        <h3>Upload or Drop an Image</h3>
+        <p>Select an image showing 0-5 fingers</p>
+        <input type="file" id="fileInput" accept="image/*">
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            📁 Choose Image
+        </button>
+        <button class="camera-btn" onclick="toggleCamera()">
+            📷 Use Camera
+        </button>
+        <p style="margin-top: 15px; color: #666;">or drag and drop an image here</p>
+    </div>
+
+    <div class="camera-section" id="cameraSection">
+        <h3>📹 Camera</h3>
+        <video id="cameraVideo" autoplay muted></video>
+        <div class="camera-controls">
+            <button class="capture-btn" onclick="capturePhoto()">📸 Capture Photo</button>
+            <button class="capture-btn stop-camera-btn" onclick="stopCamera()">⏹️ Stop Camera</button>
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        <button class="predict-btn" id="predictBtn" onclick="predictFingers()" disabled>
+            🔮 Count Fingers
+        </button>
+    </div>
+
+    <div class="results-section" id="resultsSection" style="display: none;">
+        <div class="image-preview">
+            <h3>📸 Your Image</h3>
+            <img id="previewImage" alt="Uploaded image">
+        </div>
+
+        <div class="prediction-result" id="predictionResult">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedImage = null;
+    let imageBase64 = null;
+    let cameraStream = null;
+
+    // File input handling
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+    // Drag and drop handling
+    const uploadSection = document.getElementById('uploadSection');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        uploadSection.classList.add('drag-over');
+    }
+
+    function unhighlight(e) {
+        uploadSection.classList.remove('drag-over');
+    }
+
+    uploadSection.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+    }
+
+    function handleFileSelect(e) {
+        handleFiles(e.target.files);
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                selectedImage = file;
+                displayImagePreview(file);
+                document.getElementById('predictBtn').disabled = false;
+                stopCamera(); // Stop camera if running
+            } else {
+                alert('Please select an image file.');
+            }
+        }
+    }
+
+    function displayImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imageBase64 = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+            document.getElementById('previewImage').src = e.target.result;
+            document.getElementById('resultsSection').style.display = 'grid';
+
+            // Clear previous prediction
+            document.getElementById('predictionResult').innerHTML = '<h3>🤖 Prediction</h3><p>Click "Count Fingers" to analyze the image</p>';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function toggleCamera() {
+        const cameraSection = document.getElementById('cameraSection');
+        const video = document.getElementById('cameraVideo');
+
+        if (cameraStream) {
+            stopCamera();
+        } else {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    }
+                });
+                video.srcObject = cameraStream;
+                cameraSection.style.display = 'block';
+            } catch (err) {
+                alert('Error accessing camera: ' + err.message);
+                console.error('Camera error:', err);
+            }
+        }
+    }
+
+    function stopCamera() {
+        if (cameraStream) {
+            const tracks = cameraStream.getTracks();
+            tracks.forEach(track => track.stop());
+            cameraStream = null;
+            document.getElementById('cameraSection').style.display = 'none';
+        }
+    }
+
+    function capturePhoto() {
+        if (!cameraStream) {
+            alert('Camera is not active');
+            return;
+        }
+
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw the video frame to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to base64
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        imageBase64 = dataURL.split(',')[1];
+
+        // Display the captured image
+        document.getElementById('previewImage').src = dataURL;
+        document.getElementById('resultsSection').style.display = 'grid';
+        document.getElementById('predictBtn').disabled = false;
+
+        // Clear previous prediction
+        document.getElementById('predictionResult').innerHTML = '<h3>🤖 Prediction</h3><p>Click "Count Fingers" to analyze the image</p>';
+
+        // Stop camera after capture
+        stopCamera();
+    }
+
+    async function predictFingers() {
+        if (!imageBase64) {
+            alert('Please select an image first.');
+            return;
+        }
+
+        const predictBtn = document.getElementById('predictBtn');
+        const predictionResult = document.getElementById('predictionResult');
+
+        // Show loading state
+        predictBtn.disabled = true;
+        predictionResult.innerHTML = `
+                <h3>🤖 Prediction</h3>
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing image...</p>
+                </div>
+            `;
+
+        try {
+            // Use the proxy endpoint instead of direct Ray Serve
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: imageBase64
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
+            displayPrediction(result);
+
+        } catch (error) {
+            predictionResult.innerHTML = `
+                    <h3>🤖 Prediction</h3>
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        <small>Make sure the model service is running</small>
+                    </div>
+                `;
+        } finally {
+            predictBtn.disabled = false;
+        }
+    }
+
+    function displayPrediction(result) {
+        const predictionResult = document.getElementById('predictionResult');
+
+        const fingerEmojis = ['✊', '☝️', '✌️', '🤟', '🖖', '🖐️'];
+        const fingerEmoji = fingerEmojis[result.prediction] || '❓';
+
+        let probabilitiesHtml = '';
+        if (result.all_probabilities) {
+            probabilitiesHtml = '<div class="probabilities"><h4>Confidence for each finger count:</h4>';
+            result.all_probabilities.forEach((prob, index) => {
+                const percentage = (prob * 100).toFixed(1);
+                probabilitiesHtml += `
+                        <div class="prob-bar">
+                            <div class="prob-label">${index} ${fingerEmojis[index]}</div>
+                            <div class="prob-visual">
+                                <div class="prob-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="prob-value">${percentage}%</div>
+                        </div>
+                    `;
+            });
+            probabilitiesHtml += '</div>';
+        }
+
+        predictionResult.innerHTML = `
+                <h3>🤖 Prediction</h3>
+                <div class="finger-count">${fingerEmoji} ${result.prediction}</div>
+                <div class="confidence">
+                    Confidence: <strong>${(result.confidence * 100).toFixed(1)}%</strong>
+                </div>
+                <div class="model-info">
+                    <strong>Model:</strong> ${result.model_type}
+                </div>
+                ${probabilitiesHtml}
+            `;
+    }
+
+    // Clean up camera on page unload
+    window.addEventListener('beforeunload', stopCamera);
+</script>
+</body>
+</html>

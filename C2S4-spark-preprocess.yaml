@@ -1,0 +1,44 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: preprocess-fingers-dataset
+  namespace: default
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "apache/spark-py:v3.4.0"
+  imagePullPolicy: Always
+  mainApplicationFile: local:///tmp/scripts/C2S2-preprocess_fingers.py
+  sparkVersion: "3.4.0"
+
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "1g"
+    labels:
+      version: 3.4.0
+    serviceAccount: spark-operator-spark
+    volumeMounts:
+      - name: data-volume
+        mountPath: /tmp/data
+        subPath: data
+      - name: data-volume
+        mountPath: /tmp/scripts
+        subPath: scripts
+  executor:
+    cores: 1
+    instances: 1
+    memory: "1g"
+    labels:
+      version: 3.4.0
+    volumeMounts:
+      - name: data-volume
+        mountPath: /tmp/data
+        subPath: data
+  volumes:
+    - name: data-volume
+      persistentVolumeClaim:
+        claimName: workshop-pvc
+  restartPolicy:
+    type: Never

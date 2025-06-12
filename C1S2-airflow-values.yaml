@@ -1,0 +1,50 @@
+# Airflow configuration values
+executor: "KubernetesExecutor"
+
+# Global volumes and volume mounts for all airflow containers
+volumes:
+  - name: workshop-folder
+    persistentVolumeClaim:
+      claimName: workshop-pvc
+
+volumeMounts:
+  - name: workshop-folder
+    mountPath: /opt/airflow/dags
+    subPath: dags
+
+# Webserver configuration
+webserver:
+  service:
+    type: NodePort
+  startupProbe:
+    failureThreshold: 30        # Allows up to 5 minutes (30 * 10s)
+    periodSeconds: 10
+    timeoutSeconds: 20
+  livenessProbe:
+    initialDelaySeconds: 5      # Short delay since startupProbe handles initial wait
+    periodSeconds: 15
+    failureThreshold: 3
+    timeoutSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 5      # Short delay since startupProbe handles initial wait
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 5
+  webserverConfig: |
+    AUTH_ROLE_PUBLIC = 'Admin' 
+  env:
+    - name: AIRFLOW__WEBSERVER__WORKERS
+      value: "2"
+
+# Airflow configuration overrides
+config:
+  webserver:
+    rbac: false
+    authentication: false
+  kubernetes:
+    # delete_worker_pods_on_failure: "False"
+    # delete_worker_pods_on_success: "False"  # optional
+    worker_pods_pending_timeout: "600"      # seconds before timeout
+
+statsd:
+  enabled: false

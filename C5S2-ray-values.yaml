@@ -1,0 +1,67 @@
+common:
+  containerEnv:
+    - name: PYTHONPATH
+      value: /scripts
+    - name: RAY_memory_usage_threshold
+      value: "0.999"
+    - name: RAY_memory_monitor_refresh_ms
+      value: "0"
+    - name: RAY_SERVE_DEFAULT_HTTP_HOST
+      value: 0.0.0.0
+head:
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4G"
+    requests:
+      cpu: "1"
+      memory: "1G"
+  rayStartParams:
+    dashboard-host: 0.0.0.0
+    disable-usage-stats: true
+#  sidecarContainers:
+#  - name: proxy
+#    image: alpine/socat
+#    command:
+#      - sh
+#      - -c
+#      - |
+#        POD_IP=$(hostname -i)
+#        exec socat TCP-LISTEN:8000,bind=$POD_IP,fork,reuseaddr TCP:127.0.0.1:8000
+#    ports:
+#      - containerPort: 8000
+  volumeMounts:
+    - mountPath: /scripts
+      name: workshop-folder
+      subPath: scripts
+    - mountPath: /data
+      name: workshop-folder
+      subPath: data
+  volumes:
+    - name: workshop-folder
+      persistentVolumeClaim:
+        claimName: workshop-pvc
+image:
+  pullPolicy: IfNotPresent
+  repository: docker.io/komodorio/mlops-workshop
+  tag: latest
+worker:
+  volumeMounts:
+    - mountPath: /scripts
+      name: workshop-folder
+      subPath: scripts
+    - mountPath: /data
+      name: workshop-folder
+      subPath: data
+  volumes:
+    - name: workshop-folder
+      persistentVolumeClaim:
+        claimName: workshop-pvc
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4G"
+    requests:
+      cpu: "1"
+      memory: "1G"
+

@@ -1,0 +1,4 @@
+leaderElectionEnabled: false
+env:
+  - name: RAYCLUSTER_DEFAULT_REQUEUE_SECONDS_ENV
+    value: "10"
