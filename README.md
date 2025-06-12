@@ -1,4 +1,5 @@
 # MLOps Workshop
+![](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg)
 
 ## Chapter 0: Preparations
 
@@ -29,6 +30,7 @@ Explain workshop setting: bypass auth, everything in single cluster and same nam
 Using PVCs and configmaps for storage - workshop setup.
 All has to go into same namespace because of using PVCs to share the data. Real world would use Git, S3, NFS etc.
 Creating dedicated images would decrease the startup overhead.
+Training on CPU is not recommended to children and pregnant women.
 
 ```shell
 docker build . -t docker.io/komodorio/mlops-workshop:latest
@@ -73,7 +75,6 @@ kubectl apply -f C2S1-airflow-spark-crb.yaml
 
 Wait for operator deploy to complete.
 
-![](https://storage.googleapis.com/kaggle-datasets-images/98056/230124/e022946c52ffb2150ea1550285d1b8c9/dataset-cover.jpg)
 Loading dataset: [koryakinp/fingers](https://www.kaggle.com/datasets/koryakinp/fingers) from Kaggle. Taking 200 images
 as "small" dataset, full images
 
@@ -157,6 +158,7 @@ kubectl port-forward service/ray-cluster-kuberay-head-svc 8265:8265
 ```
 See empty Ray interface. 
 Let's run Ray-scaled experiment. 4 models with 2 learning rates = 8 experiments total.
+Ray will decide how to run experiments according to their resource requests.
 ```shell
 kubectl cp C5S4-dag5.py workshop-helper-pod:/data/dags/
 kubectl cp C5S5-ray-tune.py workshop-helper-pod:/data/scripts/
@@ -188,6 +190,7 @@ kubectl exec workshop-helper-pod -- /bin/bash -c "echo '{\"image\":\"'\$(base64 
 ## Chapter 7: Everything together, at once
 
 Skip this step if you trust it will work, because it will run long.
+It would be good to delete all runs of small dataset from "finger-counting" experiment, to not compete for best model chooser.
 
 ```shell
 kubectl cp C7S1-ray-tune-large.py workshop-helper-pod:/data/scripts/
@@ -195,7 +198,7 @@ kubectl cp C7S2-dag7.py workshop-helper-pod:/data/dags/
 kubectl exec deployment/airflow-scheduler -- /bin/bash -c "airflow dags reserialize && airflow dags unpause dag7_complete && airflow dags trigger dag7_complete"
 ```
 
-After this, your machine will be busy for long
+After this, your machine will be busy for long. This is where you want to switch to GPU training.
 
 
 ## Chapter 8: Consuming the results
