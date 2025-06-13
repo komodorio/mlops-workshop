@@ -43,7 +43,7 @@ head:
         claimName: workshop-pvc
 image:
   pullPolicy: IfNotPresent
-  repository: docker.io/komodorio/mlops-workshop
+  repository: docker.io/komikomodor/mlops-workshop
   tag: latest
 worker:
   volumeMounts:

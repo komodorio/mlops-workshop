@@ -41,8 +41,8 @@ Our cluster will need a special Docker image inside. In case it's not possible t
 it locally and load into Kind cluster:
 
 ```shell
-docker build . -t docker.io/komodorio/mlops-workshop:latest
-kind load docker-image docker.io/komodorio/mlops-workshop:latest
+docker build . -t docker.io/komikomodor/mlops-workshop:latest
+kind load docker-image docker.io/komikomodor/mlops-workshop:latest
 ```
 
 Workshop setting: bypass auth, everything in single cluster and same namespace.
