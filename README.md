@@ -255,4 +255,20 @@ Also you can try a local app using camera live.
 python3 C8S3-camera.py
 ```
 
+To improve results, maybe the training data should be changed to https://www.kaggle.com/c/finger-n/data
 
+## Cleanup
+In reverse order
+
+```shell
+helm uninstall ray-cluster
+helm uninstall kuberay-operator
+helm uninstall mlflow
+helm uninstall spark-operator
+helm uninstall airflow
+helm uninstall --namespace komodor komodor-agent
+
+kubectl delete -f C2S1-airflow-spark-crb.yaml
+kubectl delete -f C0S2-workshop-helper-pod.yaml
+kubectl delete -f C0S1-workshop-pvc.yaml
+```
