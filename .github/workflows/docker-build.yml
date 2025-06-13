@@ -6,7 +6,7 @@ on:
       - "main"
   workflow_dispatch:
 
-jobs:  
+jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -18,7 +18,7 @@ jobs:
         uses: docker/metadata-action@v5
         id: meta
         with:
-          images: komodorio/mlops-workshop
+          images: komikomodor/mlops-workshop
           tags: |
             type=raw,value=latest
             type=sha,format=short
@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }},latest
-          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
