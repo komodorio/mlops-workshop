@@ -7,7 +7,7 @@ experiment = mlflow.get_experiment_by_name(experiment_name)
 
 runs = mlflow.search_runs(
     experiment_ids=[experiment.experiment_id],
-    order_by=["metrics.val_accuracy DESC, metrics.train_accuracy DESC"],
+    order_by=["metrics.val_accuracy DESC"],
     max_results=1,
 )
 

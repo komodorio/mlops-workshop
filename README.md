@@ -12,10 +12,10 @@ It's just like automated "Miss Universe" choosing.
 
 Prerequisites:
 
-- k8s kIND installed,
-- helm installed
-- k9s installed
-- kubectl installed
+- k8s [kIND](https://kind.sigs.k8s.io/) installed
+- [helm](https://helm.sh/) installed
+- [k9s](https://k9scli.io/) installed
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) installed
 
 Starting from clean Kind cluster:
 
